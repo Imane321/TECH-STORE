@@ -1,7 +1,6 @@
 -- ============================================================
 --  tech_store.sql
 --  Base de données : Aykon Tech Store
---  Cours Ch.8 — Dounia LOTFI
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS aykon_store CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
