@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Produits — Admin</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <style>
+    .admin-layout { display:flex; min-height:100vh; padding-top:var(--nav-height); }
+    .admin-main { flex:1; padding:32px; background:var(--bg-primary); }
+    .admin-nav-link { display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:var(--radius-sm); color:var(--text-secondary); font-size:0.875rem; font-weight:500; transition:var(--transition); margin-bottom:4px; text-decoration:none; }
+    .admin-nav-link:hover, .admin-nav-link.active { background:var(--bg-hover); color:var(--text-primary); }
+    .toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+    .btn-add { background:var(--accent); border:none; color:var(--bg-primary); padding:10px 20px; border-radius:var(--radius-sm); font-family:var(--font-body); font-size:0.875rem; font-weight:700; cursor:pointer; transition:var(--transition); }
+    .btn-add:hover { background:#00c9e6; }
+    .search-bar { display:flex; align-items:center; gap:8px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 14px; }
+    .search-bar input { background:none; border:none; outline:none; color:var(--text-primary); font-family:var(--font-body); font-size:0.875rem; }
+    .products-table { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    th { padding:14px 16px; font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; text-align:left; background:var(--bg-secondary); border-bottom:1px solid var(--border); }
+    td { padding:14px 16px; font-size:0.875rem; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-secondary); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:var(--bg-hover); }
+    .badge { padding:3px 10px; border-radius:100px; font-size:0.72rem; font-weight:700; text-transform:uppercase; }
+    .badge-pc { background:rgba(0,229,255,0.1); color:var(--accent); border:1px solid rgba(0,229,255,0.25); }
+    .badge-phones { background:rgba(124,58,237,0.1); color:#a78bfa; border:1px solid rgba(124,58,237,0.25); }
+    .badge-accessories { background:rgba(255,179,0,0.1); color:var(--amber); border:1px solid rgba(255,179,0,0.25); }
+    .btn-edit { background:var(--bg-hover); border:1px solid var(--border); color:var(--text-secondary); padding:5px 12px; border-radius:var(--radius-sm); font-size:0.75rem; cursor:pointer; transition:var(--transition); }
+    .btn-edit:hover { border-color:var(--border-accent); color:var(--accent); }
+    .btn-del { background:rgba(255,68,68,0.1); border:1px solid rgba(255,68,68,0.25); color:var(--red); padding:5px 12px; border-radius:var(--radius-sm); font-size:0.75rem; cursor:pointer; }
+    /* Modal */
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; }
+    .modal-bg.open { display:flex; }
+    .modal { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:32px; width:100%; max-width:540px; max-height:90vh; overflow-y:auto; }
+    .form-group { margin-bottom:16px; }
+    .form-label { display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
+    .form-input { width:100%; background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; color:var(--text-primary); font-family:var(--font-body); font-size:0.875rem; }
+    .form-input:focus { outline:none; border-color:var(--border-accent); }
+    select.form-input { cursor:pointer; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="../../index.html" class="nav-logo">AYKON <span>TECH</span></a>
+      <div class="nav-actions">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Admin — Produits</span>
+        <button class="btn-nav-auth btn-outline" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </nav>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="logo"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent);">⚙ Admin</span></div>
+      <a href="dashboard.html" class="admin-nav-link">📊 Dashboard</a>
+      <a href="products-admin.html" class="admin-nav-link active">📦 Produits</a>
+      <a href="orders-admin.html" class="admin-nav-link">🛒 Commandes</a>
+      <a href="users-admin.html" class="admin-nav-link">👥 Utilisateurs</a>
+      <a href="../../index.html" class="admin-nav-link">🏠 Voir la boutique</a>
+    </aside>
+    <main class="admin-main">
+      <div class="toolbar">
+        <div>
+          <h2 style="margin-bottom:4px;">Gestion des produits</h2>
+          <p style="color:var(--text-muted);font-size:0.875rem;" id="productCount">Chargement...</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <div class="search-bar">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" id="searchProd" placeholder="Chercher un produit..." oninput="filterTable()">
+          </div>
+          <button class="btn-add" onclick="openModal()">+ Ajouter un produit</button>
+        </div>
+      </div>
+
+      <div class="products-table">
+        <table>
+          <thead><tr><th>Produit</th><th>Catégorie</th><th>Marque</th><th>Prix</th><th>Stock</th><th>Note</th><th>Actions</th></tr></thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Ajout/Édition -->
+  <div class="modal-bg" id="productModal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h3 id="modalTitle">Ajouter un produit</h3>
+        <button onclick="closeModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.4rem;">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nom du produit</label>
+        <input type="text" class="form-input" id="pName" placeholder="Ex: iPhone 15 Pro">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Catégorie</label>
+          <select class="form-input" id="pCat">
+            <option value="pc">🖥️ PC</option>
+            <option value="phones">📱 Téléphone</option>
+            <option value="accessories">🎧 Accessoire</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Marque</label>
+          <input type="text" class="form-input" id="pBrand" placeholder="Apple, Samsung...">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Prix (MAD)</label>
+          <input type="number" class="form-input" id="pPrice" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock</label>
+          <input type="number" class="form-input" id="pStock" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emoji représentatif</label>
+        <input type="text" class="form-input" id="pEmoji" placeholder="💻 ou 📱">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn-add" onclick="saveProduct()" style="flex:1;">Enregistrer</button>
+        <button onclick="closeModal()" style="flex:1;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-secondary);padding:10px;border-radius:var(--radius-sm);cursor:pointer;">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../../js/main.js"></script>
+  <script>
+    // Use the same mock data
+    let products = [
+      { id:1, name:'MacBook Pro 14" M3', brand:'Apple', category:'pc', price:18900, rating:4.8, stock:5, emoji:'💻' },
+      { id:2, name:'iPhone 15 Pro Max', brand:'Apple', category:'phones', price:14500, rating:4.9, stock:8, emoji:'📱' },
+      { id:3, name:'Galaxy S24 Ultra', brand:'Samsung', category:'phones', price:12900, rating:4.7, stock:12, emoji:'📱' },
+      { id:4, name:'Dell XPS 15 OLED', brand:'Dell', category:'pc', price:16500, rating:4.6, stock:3, emoji:'💻' },
+      { id:5, name:'Sony WH-1000XM5', brand:'Sony', category:'accessories', price:2800, rating:4.8, stock:20, emoji:'🎧' },
+      { id:6, name:'Logitech MX Master 3', brand:'Logitech', category:'accessories', price:890, rating:4.7, stock:35, emoji:'🖱️' },
+      { id:7, name:'Asus ROG Zephyrus G14', brand:'Asus', category:'pc', price:14200, rating:4.5, stock:6, emoji:'💻' },
+      { id:8, name:'HP EliteBook 840 G10', brand:'HP', category:'pc', price:11200, rating:4.3, stock:9, emoji:'💻' },
+      { id:9, name:'Xiaomi 14 Ultra', brand:'Xiaomi', category:'phones', price:9800, rating:4.6, stock:18, emoji:'📱' },
+      { id:10, name:'Clavier Mécanique Keychron K2', brand:'Keychron', category:'accessories', price:640, rating:4.6, stock:50, emoji:'⌨️' },
+    ];
+    let editingId = null;
+
+    function catLabel(c) {
+      return { pc:'pc', phones:'phones', accessories:'accessories' }[c] || c;
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('productsTableBody');
+      document.getElementById('productCount').textContent = `${data.length} produit(s)`;
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td><span style="font-size:1.2rem;margin-right:8px;">${p.emoji}</span><strong style="color:var(--text-primary);">${p.name}</strong></td>
+          <td><span class="badge badge-${p.category}">${p.category}</span></td>
+          <td>${p.brand}</td>
+          <td style="color:var(--accent);font-weight:700;">${new Intl.NumberFormat('fr-MA').format(p.price)} MAD</td>
+          <td><span style="color:${p.stock < 5 ? 'var(--red)' : 'var(--green)'};font-weight:600;">${p.stock}</span></td>
+          <td style="color:var(--amber);">★ ${p.rating}</td>
+          <td style="display:flex;gap:6px;">
+            <button class="btn-edit" onclick="editProduct(${p.id})">✏️ Modifier</button>
+            <button class="btn-del" onclick="deleteProduct(${p.id})">🗑</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterTable() {
+      const q = document.getElementById('searchProd').value.toLowerCase();
+      renderTable(products.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q)));
+    }
+
+    function openModal(id = null) {
+      editingId = id;
+      document.getElementById('modalTitle').textContent = id ? 'Modifier le produit' : 'Ajouter un produit';
+      if (id) {
+        const p = products.find(x => x.id === id);
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pCat').value = p.category;
+        document.getElementById('pBrand').value = p.brand;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pStock').value = p.stock;
+        document.getElementById('pEmoji').value = p.emoji;
+      } else {
+        ['pName','pBrand','pPrice','pStock','pEmoji'].forEach(id => document.getElementById(id).value = '');
+      }
+      document.getElementById('productModal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('productModal').classList.remove('open'); }
+
+    function editProduct(id) { openModal(id); }
+
+    function deleteProduct(id) {
+      if (!confirm('Supprimer ce produit ?')) return;
+      products = products.filter(p => p.id !== id);
+      filterTable();
+      showToast('Produit supprimé', 'success');
+    }
+
+    function saveProduct() {
+      const name = document.getElementById('pName').value.trim();
+      const brand = document.getElementById('pBrand').value.trim();
+      const price = parseInt(document.getElementById('pPrice').value);
+      const stock = parseInt(document.getElementById('pStock').value);
+      const category = document.getElementById('pCat').value;
+      const emoji = document.getElementById('pEmoji').value.trim() || '📦';
+      if (!name || !brand || !price) { showToast('Remplissez les champs obligatoires', 'warning'); return; }
+
+      if (editingId) {
+        const p = products.find(x => x.id === editingId);
+        Object.assign(p, { name, brand, price, stock, category, emoji });
+        showToast('Produit modifié', 'success');
+      } else {
+        products.push({ id: Date.now(), name, brand, price, stock, category, emoji, rating: 0 });
+        showToast('Produit ajouté !', 'success');
+      }
+      closeModal();
+      filterTable();
+    }
+
+    renderTable(products);
+  </script>
+</body>
+</html>

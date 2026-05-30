@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commandes — Admin</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="../../index.html" class="nav-logo">AYKON <span>TECH</span></a>
+      <div class="nav-actions">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Admin — Commandes</span>
+        <button class="btn-nav-auth btn-outline" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="logo"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent);">⚙ Admin</span></div>
+      <a href="dashboard.html" class="admin-nav-link">📊 Dashboard</a>
+      <a href="products-admin.html" class="admin-nav-link">📦 Produits</a>
+      <a href="orders-admin.html" class="admin-nav-link active">🛒 Commandes</a>
+      <a href="users-admin.html" class="admin-nav-link">👥 Utilisateurs</a>
+      <a href="../../index.html" class="admin-nav-link" style="margin-top:auto;">🏠 Voir la boutique</a>
+    </aside>
+
+    <main class="admin-main">
+      <div style="margin-bottom:24px;">
+        <h2 style="margin-bottom:4px;">Gestion des commandes</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;" id="ordersCount">Chargement...</p>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-grid" style="margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-icon">🛒</div>
+          <div class="stat-val">342</div>
+          <div class="stat-lbl">Total commandes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-val" style="color:var(--amber);">18</div>
+          <div class="stat-lbl">En attente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🚚</div>
+          <div class="stat-val" style="color:var(--accent);">24</div>
+          <div class="stat-lbl">En cours</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-val" style="color:var(--green);">292</div>
+          <div class="stat-lbl">Livrées</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="admin-filter-bar">
+        <div class="admin-search">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Rechercher une commande, un client..." oninput="filterTable(this.value)" id="searchOrder">
+        </div>
+        <select class="admin-select" onchange="filterByStatus(this.value)" id="statusFilter">
+          <option value="">Tous les statuts</option>
+          <option value="en attente">En attente</option>
+          <option value="en cours">En cours</option>
+          <option value="livré">Livré</option>
+          <option value="annulé">Annulé</option>
+        </select>
+        <select class="admin-select">
+          <option>Ce mois</option>
+          <option>Semaine dernière</option>
+          <option>Mois dernier</option>
+          <option>Toute l'année</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Commande</th>
+                <th>Client</th>
+                <th>Date</th>
+                <th>Articles</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableAdmin"></tbody>
+          </table>
+        </div>
+        <div class="admin-pagination" style="padding:16px 20px;">
+          <span id="paginationInfo">—</span>
+          <div style="display:flex;gap:6px;" id="paginationBtns"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Order detail modal -->
+  <div class="modal-bg" id="orderModal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 id="modalTitle">Détails commande</h3>
+        <button onclick="document.getElementById('orderModal').classList.remove('open')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.4rem;">✕</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../../js/main.js"></script>
+  <script>
+  const ORDERS = [
+    {id:'#1042',client:'Youssef El Amrani',email:'youssef@test.ma',date:'24/05/2025',items:3,amount:21300,status:'livré'},
+    {id:'#1041',client:'Fatima Zahra M.',email:'fzm@test.ma',date:'23/05/2025',items:1,amount:2800,status:'livré'},
+    {id:'#1040',client:'Karim Benali',email:'karim@test.ma',date:'22/05/2025',items:2,amount:14500,status:'en cours'},
+    {id:'#1039',client:'Sara Idrissi',email:'sara@test.ma',date:'21/05/2025',items:1,amount:890,status:'livré'},
+    {id:'#1038',client:'Omar Tahiri',email:'omar@test.ma',date:'20/05/2025',items:1,amount:5400,status:'annulé'},
+    {id:'#1037',client:'Aicha Bensalah',email:'aicha@test.ma',date:'19/05/2025',items:2,amount:3690,status:'en cours'},
+    {id:'#1036',client:'Hassan Oumri',email:'hassan@test.ma',date:'18/05/2025',items:4,amount:46800,status:'livré'},
+    {id:'#1035',client:'Nadia Chraibi',email:'nadia@test.ma',date:'17/05/2025',items:1,amount:640,status:'livré'},
+    {id:'#1034',client:'Mehdi Alaoui',email:'mehdi@test.ma',date:'16/05/2025',items:2,amount:18100,status:'en attente'},
+    {id:'#1033',client:'Leila Fassi',email:'leila@test.ma',date:'15/05/2025',items:1,amount:12900,status:'en cours'},
+    {id:'#1032',client:'Adil Zaki',email:'adil@test.ma',date:'14/05/2025',items:3,amount:8230,status:'livré'},
+    {id:'#1031',client:'Rim El Ouafi',email:'rim@test.ma',date:'13/05/2025',items:1,amount:14500,status:'en attente'},
+  ];
+
+  const statusCfg = {
+    'livré':      {color:'var(--green)',  bg:'rgba(0,210,106,0.1)', border:'rgba(0,210,106,0.25)'},
+    'en cours':   {color:'var(--amber)',  bg:'rgba(255,179,0,0.1)', border:'rgba(255,179,0,0.25)'},
+    'en attente': {color:'var(--text-muted)', bg:'rgba(138,143,158,0.1)', border:'rgba(138,143,158,0.2)'},
+    'annulé':     {color:'var(--red)',    bg:'rgba(255,68,68,0.1)', border:'rgba(255,68,68,0.25)'},
+  };
+
+  let filteredOrders = [...ORDERS];
+  let currentPage = 1;
+  const PER_PAGE = 8;
+
+  function renderTable() {
+    const tbody = document.getElementById('ordersTableAdmin');
+    const start = (currentPage-1)*PER_PAGE;
+    const page = filteredOrders.slice(start, start+PER_PAGE);
+    document.getElementById('ordersCount').textContent = `${filteredOrders.length} commande${filteredOrders.length>1?'s':''}`;
+    document.getElementById('paginationInfo').textContent = `${start+1}–${Math.min(start+PER_PAGE,filteredOrders.length)} sur ${filteredOrders.length}`;
+
+    const total = Math.ceil(filteredOrders.length/PER_PAGE);
+    document.getElementById('paginationBtns').innerHTML = Array.from({length:total},(_,i)=>`
+      <button onclick="goPage(${i+1})" style="width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid ${i+1===currentPage?'var(--accent)':'var(--border)'};background:${i+1===currentPage?'var(--accent)':'var(--bg-card)'};color:${i+1===currentPage?'var(--bg-primary)':'var(--text-secondary)'};cursor:pointer;font-family:var(--font-body);font-size:0.8rem;">${i+1}</button>
+    `).join('');
+
+    tbody.innerHTML = page.map(o => {
+      const st = statusCfg[o.status] || statusCfg['en attente'];
+      return `
+        <tr>
+          <td style="font-weight:700;color:var(--text-primary);">${o.id}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="user-avatar">${o.client.charAt(0)}</div>
+              <div>
+                <div style="font-size:0.875rem;color:var(--text-primary);font-weight:500;">${o.client}</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);">${o.email}</div>
+              </div>
+            </div>
+          </td>
+          <td>${o.date}</td>
+          <td>${o.items} article${o.items>1?'s':''}</td>
+          <td style="font-weight:700;color:var(--text-primary);">${formatPrice(o.amount)}</td>
+          <td>
+            <span style="padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700;text-transform:uppercase;background:${st.bg};color:${st.color};border:1px solid ${st.border};">${o.status}</span>
+          </td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button onclick="showDetail('${o.id}')" class="btn-tbl-edit">Détails</button>
+              <select onchange="updateStatus('${o.id}',this.value)" style="background:var(--bg-hover);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);padding:4px 8px;font-size:0.72rem;cursor:pointer;font-family:var(--font-body);">
+                <option value="">Changer statut</option>
+                <option value="en attente">En attente</option>
+                <option value="en cours">En cours</option>
+                <option value="livré">Livré</option>
+                <option value="annulé">Annulé</option>
+              </select>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function goPage(n) { currentPage=n; renderTable(); }
+
+  function filterTable(q) {
+    const status = document.getElementById('statusFilter').value;
+    filteredOrders = ORDERS.filter(o => {
+      const matchQ = !q || o.id.includes(q) || o.client.toLowerCase().includes(q.toLowerCase());
+      const matchS = !status || o.status === status;
+      return matchQ && matchS;
+    });
+    currentPage = 1;
+    renderTable();
+  }
+
+  function filterByStatus(s) {
+    const q = document.getElementById('searchOrder').value;
+    filteredOrders = ORDERS.filter(o => {
+      const matchQ = !q || o.id.includes(q) || o.client.toLowerCase().includes(q.toLowerCase());
+      const matchS = !s || o.status === s;
+      return matchQ && matchS;
+    });
+    currentPage = 1;
+    renderTable();
+  }
+
+  function showDetail(id) {
+    const o = ORDERS.find(x=>x.id===id);
+    if (!o) return;
+    document.getElementById('modalTitle').textContent = `Commande ${o.id}`;
+    const st = statusCfg[o.status];
+    document.getElementById('modalBody').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Client</div>
+          <div style="font-weight:600;">${o.client}</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">${o.email}</div>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;margin-bottom:8px;">Résumé</div>
+          <div>${o.items} article${o.items>1?'s':''}</div>
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--accent);">${formatPrice(o.amount)}</div>
+        </div>
+      </div>
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;font-weight:600;margin-bottom:4px;">Statut actuel</div>
+            <span style="padding:4px 12px;border-radius:100px;font-size:0.8rem;font-weight:700;background:${st.bg};color:${st.color};border:1px solid ${st.border};">${o.status}</span>
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Date : ${o.date}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="updateStatus('${o.id}','livré');document.getElementById('orderModal').classList.remove('open');" style="flex:1;padding:10px;background:rgba(0,210,106,0.1);border:1px solid rgba(0,210,106,0.3);border-radius:var(--radius-sm);color:var(--green);cursor:pointer;font-family:var(--font-body);font-weight:600;font-size:0.875rem;">Marquer livré</button>
+        <button onclick="updateStatus('${o.id}','annulé');document.getElementById('orderModal').classList.remove('open');" style="flex:1;padding:10px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.25);border-radius:var(--radius-sm);color:var(--red);cursor:pointer;font-family:var(--font-body);font-weight:600;font-size:0.875rem;">Annuler</button>
+      </div>
+    `;
+    document.getElementById('orderModal').classList.add('open');
+  }
+
+  function updateStatus(id, status) {
+    const o = ORDERS.find(x=>x.id===id);
+    if (o) { o.status = status; filteredOrders = [...ORDERS]; renderTable(); showToast(`Commande ${id} : statut mis à jour → ${status}`, 'success'); }
+  }
+
+  document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+</body>
+</html>

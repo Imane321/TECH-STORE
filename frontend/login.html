@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Aykon Tech Store</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">AYKON <span>TECH</span></a>
+      <div class="nav-actions">
+        <a href="register.html"><button class="btn-nav-auth btn-outline">S'inscrire</button></a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="auth-page">
+    <div class="auth-card">
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="width:56px;height:56px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.5rem;">🔐</div>
+        <h2>Connexion</h2>
+        <p class="subtitle">Accédez à votre compte Aykon Tech</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="email">Adresse email</label>
+          <input type="email" id="email" name="email" class="form-input" placeholder="votre@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Mot de passe</label>
+          <div style="position:relative;">
+            <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
+            <button type="button" onclick="togglePassword()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8rem;">Voir</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.875rem;cursor:pointer;">
+            <input type="checkbox" id="rememberMe" style="accent-color:var(--accent);"> Se souvenir de moi
+          </label>
+          <a href="#" style="font-size:0.875rem;color:var(--accent);">Mot de passe oublié ?</a>
+        </div>
+        <div id="loginError" style="display:none;background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:var(--radius-sm);padding:12px;font-size:0.875rem;color:#ff4444;margin-bottom:16px;"></div>
+        <button type="submit" class="btn-submit" id="loginBtn">Se connecter</button>
+      </form>
+
+      <div style="text-align:center;margin-top:24px;font-size:0.875rem;color:var(--text-muted);">
+        Pas encore de compte ? <a href="register.html" style="color:var(--accent);font-weight:600;">S'inscrire</a>
+      </div>
+
+      <!-- Demo admin shortcut -->
+      <div style="margin-top:24px;padding:16px;background:var(--accent2-dim);border:1px solid rgba(124,58,237,0.25);border-radius:var(--radius-md);font-size:0.8rem;color:var(--text-muted);">
+        <strong style="color:#a78bfa;">Demo</strong> — Admin: admin@aykon.ma / admin123
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

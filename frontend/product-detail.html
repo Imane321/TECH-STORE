@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produit — Aykon Tech Store</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="rgba(0,229,255,0.1)"/><path d="M8 10h8M8 16h10M8 22h6" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/><rect x="18" y="8" width="8" height="16" rx="2" fill="none" stroke="#00e5ff" stroke-width="1.5"/></svg>
+        AYKON <span>TECH</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">Accueil</a>
+        <a href="Products.html?cat=pc">PCs</a>
+        <a href="Products.html?cat=phones">Téléphones</a>
+        <a href="Products.html?cat=accessories">Accessoires</a>
+        <a href="Products.html">Tous les produits</a>
+      </div>
+      <div class="nav-actions">
+        <div class="nav-search">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="searchInput" placeholder="Rechercher...">
+        </div>
+        <button class="cart-btn" id="cartToggle">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <a href="login.html"><button class="btn-nav-auth btn-outline">Connexion</button></a>
+        <div class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay" onclick="closeCart()"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>🛒 Mon Panier</h3>
+      <button onclick="closeCart()" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.4rem;">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total"><span>Total</span><span id="cartTotal">0 MAD</span></div>
+      <button class="btn-checkout" onclick="window.location.href='checkout.html'">Valider la commande →</button>
+    </div>
+  </aside>
+
+  <!-- BREADCRUMB -->
+  <div style="padding-top:calc(var(--nav-height) + 24px); padding-bottom:16px; background:var(--bg-secondary); border-bottom:1px solid var(--border);">
+    <div class="container">
+      <div style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:8px; align-items:center;">
+        <a href="index.html" style="color:var(--text-muted); transition:var(--transition);" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">Accueil</a>
+        <span>›</span>
+        <a href="Products.html" style="color:var(--text-muted);" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">Produits</a>
+        <span>›</span>
+        <span id="breadcrumbName" style="color:var(--text-primary);">Chargement...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL -->
+  <section class="section">
+    <div class="container">
+      <div id="productDetail" style="display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start;">
+        <!-- Injected by JS -->
+        <div style="text-align:center; padding:80px; color:var(--text-muted);">Chargement...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RELATED PRODUCTS -->
+  <section class="section" style="background:var(--bg-secondary); padding-top:60px;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Suggestions</div>
+        <h2>Vous pourriez aimer</h2>
+      </div>
+      <div id="relatedProducts" class="grid-4"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-bottom">
+        <p>© 2025 Aykon Tech Store. Tous droits réservés.</p>
+        <p>Développé avec ❤️ pour le PFM</p>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/main.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/products.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const id = parseInt(getParam('id'));
+    const product = MOCK_PRODUCTS.find(p => p.id === id);
+    const container = document.getElementById('productDetail');
+
+    if (!product) {
+      container.innerHTML = '<div style="text-align:center;padding:80px;color:var(--text-muted);">Produit introuvable. <a href="Products.html" style="color:var(--accent);">Retour catalogue →</a></div>';
+      return;
+    }
+
+    document.title = `${product.name} — Aykon Tech Store`;
+    document.getElementById('breadcrumbName').textContent = product.name;
+
+    const discount = product.oldPrice ? Math.round((1 - product.price / product.oldPrice) * 100) : null;
+    const specs = {
+      pc: [['Processeur','Intel Core i7 / AMD Ryzen 7'],['RAM','16 Go DDR5'],['Stockage','512 Go NVMe SSD'],['Écran','15.6" Full HD IPS'],['GPU','NVIDIA RTX 4060'],['OS','Windows 11 Pro']],
+      phones: [['Écran','6.7" AMOLED 120Hz'],['Processeur','Snapdragon 8 Gen 3'],['RAM','12 Go'],['Stockage','256 Go'],['Batterie','5000 mAh'],['Caméra','200MP principal']],
+      accessories: [['Connectivité','Bluetooth 5.3 / USB-C'],['Autonomie','30h'],['Poids','250g'],['Garantie','2 ans'],['Couleurs','Noir, Blanc, Argent'],['Compatibilité','Universel']]
+    };
+    const productSpecs = specs[product.category] || specs.accessories;
+
+    container.innerHTML = `
+      <!-- Image col -->
+      <div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-xl);aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:8rem;margin-bottom:16px;position:relative;">
+          ${product.emoji}
+          ${product.badge ? `<div class="product-badge badge-${product.badge}" style="top:20px;left:20px;font-size:0.85rem;padding:6px 14px;">${product.badge === 'new' ? 'Nouveau' : product.badge === 'sale' ? '-'+discount+'%' : 'Hot'}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:10px;">
+          ${[product.emoji, product.emoji, product.emoji].map((e,i) => `
+            <div style="flex:1;aspect-ratio:1;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;transition:var(--transition);opacity:${i===0?1:0.5};" onmouseover="this.style.borderColor='var(--border-accent)';this.style.opacity=1" onmouseout="this.style.borderColor='var(--border)';this.style.opacity=${i===0?1:0.5}">${e}</div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Info col -->
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:0.75rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;">${product.brand}</span>
+          <span style="font-size:0.72rem;color:var(--text-muted);">• ${product.category === 'pc' ? 'Ordinateurs PC' : product.category === 'phones' ? 'Téléphones' : 'Accessoires'}</span>
+        </div>
+        <h1 style="font-size:clamp(1.6rem,3vw,2.4rem);margin-bottom:16px;">${product.name}</h1>
+        
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+          <span style="color:var(--amber);font-size:1.1rem;">${renderStars(product.rating)}</span>
+          <span style="font-size:0.9rem;color:var(--text-secondary);">${product.rating}/5</span>
+          <span style="color:var(--text-muted);">·</span>
+          <span style="font-size:0.85rem;color:var(--text-muted);">${product.reviews} avis</span>
+        </div>
+
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:28px;">
+          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:6px;">
+            <span style="font-family:var(--font-display);font-size:2.2rem;font-weight:800;color:var(--text-primary);">${formatPrice(product.price)}</span>
+            ${product.oldPrice ? `<span style="font-size:1rem;color:var(--text-muted);text-decoration:line-through;">${formatPrice(product.oldPrice)}</span>` : ''}
+          </div>
+          ${discount ? `<span style="font-size:0.85rem;color:var(--green);font-weight:600;">✅ Vous économisez ${formatPrice(product.oldPrice - product.price)} (${discount}%)</span>` : ''}
+          <div style="margin-top:12px;font-size:0.8rem;color:${product.stock > 5 ? 'var(--green)' : product.stock > 0 ? 'var(--amber)' : 'var(--red)'};">
+            ${product.stock > 5 ? '✅ En stock' : product.stock > 0 ? `⚠️ Plus que ${product.stock} en stock` : '❌ Rupture de stock'}
+          </div>
+        </div>
+
+        <!-- Qty + Add to cart -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;" id="addToCartZone">
+          <div style="display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+            <button onclick="changeQty(-1)" style="width:44px;height:48px;background:none;border:none;color:var(--text-primary);cursor:pointer;font-size:1.2rem;transition:var(--transition);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='none'">−</button>
+            <span id="qtyDisplay" style="min-width:44px;text-align:center;font-weight:700;">1</span>
+            <button onclick="changeQty(1)" style="width:44px;height:48px;background:none;border:none;color:var(--text-primary);cursor:pointer;font-size:1.2rem;transition:var(--transition);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='none'">+</button>
+          </div>
+          <button onclick="addProductToCart()" style="flex:1;padding:14px;background:var(--accent);border:none;border-radius:var(--radius-md);color:var(--bg-primary);font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;transition:var(--transition);" onmouseover="this.style.background='#00c9e6'" onmouseout="this.style.background='var(--accent)'">
+            🛒 Ajouter au panier
+          </button>
+          <button onclick="addWishlist(${product.id})" style="width:48px;height:48px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;font-size:1.1rem;transition:var(--transition);" title="Ajouter aux favoris" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='var(--border)'">♡</button>
+        </div>
+
+        <button onclick="window.location.href='checkout.html'" style="width:100%;padding:14px;background:var(--accent2-dim);border:1px solid rgba(124,58,237,0.3);border-radius:var(--radius-md);color:#a78bfa;font-family:var(--font-body);font-size:0.95rem;font-weight:700;cursor:pointer;transition:var(--transition);margin-bottom:28px;" onmouseover="this.style.background='rgba(124,58,237,0.25)'" onmouseout="this.style.background='var(--accent2-dim)'">
+          ⚡ Acheter maintenant
+        </button>
+
+        <!-- Specs -->
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;">
+          <div style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);font-weight:700;margin-bottom:16px;">Caractéristiques</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+            ${productSpecs.map(([k,v], i) => `
+              <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);${i >= productSpecs.length-2 ? 'border-bottom:none;' : ''}">
+                <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">${k}</div>
+                <div style="font-size:0.85rem;color:var(--text-primary);font-weight:500;">${v}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Related products
+    const related = MOCK_PRODUCTS.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+    document.getElementById('relatedProducts').innerHTML = related.map(renderProductCard).join('');
+  });
+
+  let qty = 1;
+  function changeQty(delta) {
+    qty = Math.max(1, qty + delta);
+    document.getElementById('qtyDisplay').textContent = qty;
+  }
+  function addProductToCart() {
+    const id = parseInt(getParam('id'));
+    const product = MOCK_PRODUCTS.find(p => p.id === id);
+    if (!product) return;
+    for (let i = 0; i < qty; i++) addToCart(product);
+  }
+  </script>
+</body>
+</html>

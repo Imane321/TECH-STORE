@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Profil — Aykon Tech Store</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">AYKON <span>TECH</span></a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">Accueil</a>
+        <a href="Products.html">Produits</a>
+        <a href="orders.html">Mes commandes</a>
+        <a href="profile.html" class="active">Mon profil</a>
+      </div>
+      <div class="nav-actions">
+        <button class="cart-btn" id="cartToggle">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="btn-nav-auth btn-outline" onclick="logout1()">Déconnexion</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay" onclick="closeCart()"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header"><h3>🛒 Mon Panier</h3><button onclick="closeCart()" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.4rem;">✕</button></div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer"><div class="cart-total"><span>Total</span><span id="cartTotal">0 MAD</span></div><button class="btn-checkout" onclick="window.location.href='checkout.html'">Valider →</button></div>
+  </aside>
+
+  <div style="padding-top:calc(var(--nav-height)+40px);padding-bottom:40px;background:var(--bg-secondary);border-bottom:1px solid var(--border);">
+    <div class="container">
+      <div class="section-tag mb-8">Compte</div>
+      <h2>Mon Profil</h2>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container" style="max-width:900px;">
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:32px;align-items:start;">
+
+        <!-- Sidebar -->
+        <div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;text-align:center;margin-bottom:16px;">
+            <div class="profile-avatar-wrap">
+              <div class="profile-avatar">👤</div>
+              <div class="profile-avatar-edit" title="Changer la photo">✏</div>
+            </div>
+            <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;" id="profileName">Youssef El Amrani</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;" id="profileEmail">youssef@example.com</div>
+            <div style="margin-top:16px;padding:8px 16px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:100px;font-size:0.75rem;font-weight:600;color:var(--accent);display:inline-block;">
+              Client Vérifié ✓
+            </div>
+          </div>
+
+          <!-- Nav tabs -->
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+            <button onclick="showTab('info',this)" class="profile-tab" style="width:100%;padding:14px 20px;background:var(--accent-dim);border:none;border-left:2px solid var(--accent);color:var(--accent);font-family:var(--font-body);font-size:0.875rem;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">
+              👤 Informations personnelles
+            </button>
+            <button onclick="showTab('security',this)" class="profile-tab" style="width:100%;padding:14px 20px;background:none;border:none;border-left:2px solid transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:0.875rem;font-weight:500;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;border-top:1px solid var(--border);">
+              🔒 Sécurité
+            </button>
+            <button onclick="showTab('addresses',this)" class="profile-tab" style="width:100%;padding:14px 20px;background:none;border:none;border-left:2px solid transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:0.875rem;font-weight:500;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;border-top:1px solid var(--border);">
+              📍 Adresses
+            </button>
+            <button onclick="showTab('orders',this)" class="profile-tab" style="width:100%;padding:14px 20px;background:none;border:none;border-left:2px solid transparent;color:var(--text-secondary);font-family:var(--font-body);font-size:0.875rem;font-weight:500;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;border-top:1px solid var(--border);">
+              📦 Mes commandes
+            </button>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div>
+          <!-- Tab: Info -->
+          <div id="tab-info" class="profile-panel">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;">
+              <h3 style="margin-bottom:24px;">Informations personnelles</h3>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Prénom</label>
+                  <input type="text" class="form-input" value="Youssef" id="editFirstName">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nom</label>
+                  <input type="text" class="form-input" value="El Amrani" id="editLastName">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" value="youssef@example.com" id="editEmail">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Téléphone</label>
+                <input type="tel" class="form-input" value="06 12 34 56 78" id="editPhone">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date de naissance</label>
+                <input type="date" class="form-input" value="1995-03-15">
+              </div>
+              <button onclick="saveInfo()" style="padding:12px 28px;background:var(--accent);border:none;border-radius:var(--radius-md);color:var(--bg-primary);font-family:var(--font-body);font-size:0.9rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#00c9e6'" onmouseout="this.style.background='var(--accent)'">
+                Sauvegarder
+              </button>
+            </div>
+
+            <!-- Stats -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px;">
+              <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;">
+                <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:800;color:var(--accent);">5</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">Commandes</div>
+              </div>
+              <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;">
+                <div style="font-family:var(--font-display);font-size:1.8rem;font-weight:800;color:var(--amber);">3</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">Avis</div>
+              </div>
+              <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;">
+                <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:var(--green);">46 580</div>
+                <div style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-top:4px;">MAD dépensés</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Security -->
+          <div id="tab-security" class="profile-panel" style="display:none;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;">
+              <h3 style="margin-bottom:24px;">Modifier le mot de passe</h3>
+              <div class="form-group">
+                <label class="form-label">Mot de passe actuel</label>
+                <input type="password" class="form-input" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nouveau mot de passe</label>
+                <input type="password" class="form-input" placeholder="Minimum 8 caractères" minlength="8">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirmer le nouveau mot de passe</label>
+                <input type="password" class="form-input" placeholder="Répéter le nouveau mot de passe">
+              </div>
+              <button onclick="showToast('Mot de passe modifié !','success')" style="padding:12px 28px;background:var(--accent);border:none;border-radius:var(--radius-md);color:var(--bg-primary);font-family:var(--font-body);font-size:0.9rem;font-weight:700;cursor:pointer;">
+                Mettre à jour
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab: Addresses -->
+          <div id="tab-addresses" class="profile-panel" style="display:none;">
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div style="background:var(--bg-card);border:2px solid var(--accent);border-radius:var(--radius-lg);padding:24px;position:relative;">
+                <div style="position:absolute;top:14px;right:14px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:100px;padding:3px 10px;font-size:0.72rem;color:var(--accent);font-weight:700;">Par défaut</div>
+                <div style="font-weight:700;margin-bottom:6px;">Domicile</div>
+                <div style="font-size:0.875rem;color:var(--text-secondary);">123 Boulevard Mohammed V<br>Casablanca, 20000<br>Maroc</div>
+                <div style="display:flex;gap:8px;margin-top:16px;">
+                  <button onclick="showToast('Adresse modifiée','info')" style="padding:7px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-family:var(--font-body);font-size:0.8rem;">Modifier</button>
+                </div>
+              </div>
+              <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;">
+                <div style="font-weight:700;margin-bottom:6px;">Bureau</div>
+                <div style="font-size:0.875rem;color:var(--text-secondary);">45 Rue Allal Ben Abdellah<br>Rabat, 10000<br>Maroc</div>
+                <div style="display:flex;gap:8px;margin-top:16px;">
+                  <button onclick="showToast('Adresse modifiée','info')" style="padding:7px 14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-family:var(--font-body);font-size:0.8rem;">Modifier</button>
+                  <button onclick="showToast('Adresse supprimée','error')" style="padding:7px 14px;background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.2);border-radius:var(--radius-sm);color:var(--red);cursor:pointer;font-family:var(--font-body);font-size:0.8rem;">Supprimer</button>
+                </div>
+              </div>
+              <button onclick="showToast('Fonctionnalité bientôt disponible','info')" style="padding:14px;background:var(--bg-card);border:2px dashed var(--border);border-radius:var(--radius-lg);color:var(--text-muted);cursor:pointer;font-family:var(--font-body);font-size:0.875rem;transition:var(--transition);" onmouseover="this.style.borderColor='var(--border-accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+                + Ajouter une adresse
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab: Orders -->
+          <div id="tab-orders" class="profile-panel" style="display:none;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;text-align:center;">
+              <div style="font-size:3rem;margin-bottom:16px;">📦</div>
+              <h3 style="margin-bottom:8px;">Voir toutes mes commandes</h3>
+              <p style="margin-bottom:24px;">Consultez l'historique complet de vos commandes et leur statut.</p>
+              <a href="orders.html" class="btn-hero primary" style="display:inline-flex;">Voir mes commandes →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="js/main.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+  function showTab(tab, btn) {
+    document.querySelectorAll('.profile-panel').forEach(p => p.style.display='none');
+    document.getElementById('tab-'+tab).style.display='block';
+    document.querySelectorAll('.profile-tab').forEach(t => {
+      t.style.background='none'; t.style.color='var(--text-secondary)'; t.style.borderLeftColor='transparent';
+    });
+    btn.style.background='var(--accent-dim)'; btn.style.color='var(--accent)'; btn.style.borderLeftColor='var(--accent)';
+  }
+
+  function saveInfo() {
+    const first = document.getElementById('editFirstName').value;
+    const last = document.getElementById('editLastName').value;
+    document.getElementById('profileName').textContent = first + ' ' + last;
+    document.getElementById('profileEmail').textContent = document.getElementById('editEmail').value;
+    showToast('Profil mis à jour !', 'success');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.name) document.getElementById('profileName').textContent = user.name;
+    if (user.email) document.getElementById('profileEmail').textContent = user.email;
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Utilisateurs — Admin</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="../../index.html" class="nav-logo">AYKON <span>TECH</span></a>
+      <div class="nav-actions">
+        <span style="font-size:0.8rem;color:var(--text-muted);">Admin — Utilisateurs</span>
+        <button class="btn-nav-auth btn-outline" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="logo"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent);">⚙ Admin</span></div>
+      <a href="dashboard.html" class="admin-nav-link">📊 Dashboard</a>
+      <a href="products-admin.html" class="admin-nav-link">📦 Produits</a>
+      <a href="orders-admin.html" class="admin-nav-link">🛒 Commandes</a>
+      <a href="users-admin.html" class="admin-nav-link active">👥 Utilisateurs</a>
+      <a href="../../index.html" class="admin-nav-link" style="margin-top:auto;">🏠 Voir la boutique</a>
+    </aside>
+
+    <main class="admin-main">
+      <div style="margin-bottom:24px;">
+        <h2 style="margin-bottom:4px;">Gestion des utilisateurs</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;" id="usersCount">Chargement...</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" style="margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-val">1 248</div>
+          <div class="stat-lbl">Total clients</div>
+          <div class="stat-delta delta-up">↑ +34 cette semaine</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🆕</div>
+          <div class="stat-val" style="color:var(--accent);">8</div>
+          <div class="stat-lbl">Nouveaux aujourd'hui</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-val" style="color:var(--green);">1 192</div>
+          <div class="stat-lbl">Comptes actifs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⛔</div>
+          <div class="stat-val" style="color:var(--red);">56</div>
+          <div class="stat-lbl">Comptes suspendus</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="admin-filter-bar">
+        <div class="admin-search">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--text-muted)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Rechercher un utilisateur..." oninput="filterUsers(this.value)" id="userSearch">
+        </div>
+        <select class="admin-select" onchange="filterByRole(this.value)">
+          <option value="">Tous les rôles</option>
+          <option value="client">Clients</option>
+          <option value="admin">Admins</option>
+        </select>
+        <select class="admin-select" onchange="filterByState(this.value)">
+          <option value="">Tous les statuts</option>
+          <option value="actif">Actif</option>
+          <option value="suspendu">Suspendu</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Utilisateur</th>
+                <th>Rôle</th>
+                <th>Inscription</th>
+                <th>Commandes</th>
+                <th>Total dépensé</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+        <div class="admin-pagination" style="padding:16px 20px;">
+          <span id="paginationInfo">—</span>
+          <div style="display:flex;gap:6px;" id="paginationBtns"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- User modal -->
+  <div class="modal-bg" id="userModal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 id="modalUserTitle">Détails utilisateur</h3>
+        <button onclick="document.getElementById('userModal').classList.remove('open')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.4rem;">✕</button>
+      </div>
+      <div id="modalUserBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="../../js/main.js"></script>
+  <script>
+  const USERS = [
+    {id:1,name:'Youssef El Amrani',email:'youssef@test.ma',role:'client',date:'Jan 2025',orders:5,spent:46800,status:'actif',city:'Casablanca'},
+    {id:2,name:'Fatima Zahra M.',email:'fzm@test.ma',role:'client',date:'Fév 2025',orders:3,spent:18900,status:'actif',city:'Rabat'},
+    {id:3,name:'Karim Benali',email:'karim@test.ma',role:'client',date:'Déc 2024',orders:8,spent:72400,status:'actif',city:'Casablanca'},
+    {id:4,name:'Sara Idrissi',email:'sara@test.ma',role:'client',date:'Mar 2025',orders:1,spent:890,status:'actif',city:'Marrakech'},
+    {id:5,name:'Admin Aykon',email:'admin@aykon.ma',role:'admin',date:'Jan 2024',orders:0,spent:0,status:'actif',city:'Casablanca'},
+    {id:6,name:'Omar Tahiri',email:'omar@test.ma',role:'client',date:'Avr 2025',orders:2,spent:9800,status:'suspendu',city:'Fès'},
+    {id:7,name:'Aicha Bensalah',email:'aicha@test.ma',role:'client',date:'Mar 2025',orders:4,spent:16400,status:'actif',city:'Tanger'},
+    {id:8,name:'Hassan Oumri',email:'hassan@test.ma',role:'client',date:'Nov 2024',orders:12,spent:142500,status:'actif',city:'Casablanca'},
+    {id:9,name:'Nadia Chraibi',email:'nadia@test.ma',role:'client',date:'Mai 2025',orders:1,spent:640,status:'actif',city:'Agadir'},
+    {id:10,name:'Mehdi Alaoui',email:'mehdi@test.ma',role:'client',date:'Fév 2025',orders:6,spent:34200,status:'actif',city:'Rabat'},
+    {id:11,name:'Leila Fassi',email:'leila@test.ma',role:'client',date:'Avr 2025',orders:2,spent:14800,status:'suspendu',city:'Oujda'},
+    {id:12,name:'Adil Zaki',email:'adil@test.ma',role:'client',date:'Jan 2025',orders:7,spent:58700,status:'actif',city:'Casablanca'},
+  ];
+
+  let filteredUsers = [...USERS];
+  let currentPage = 1;
+  const PER_PAGE = 8;
+  let roleFilter = '', stateFilter = '';
+
+  function renderTable() {
+    const tbody = document.getElementById('usersTableBody');
+    const start = (currentPage-1)*PER_PAGE;
+    const page = filteredUsers.slice(start, start+PER_PAGE);
+    document.getElementById('usersCount').textContent = `${filteredUsers.length} utilisateur${filteredUsers.length>1?'s':''}`;
+    document.getElementById('paginationInfo').textContent = `${start+1}–${Math.min(start+PER_PAGE,filteredUsers.length)} sur ${filteredUsers.length}`;
+
+    const total = Math.ceil(filteredUsers.length/PER_PAGE);
+    document.getElementById('paginationBtns').innerHTML = Array.from({length:total},(_,i)=>`
+      <button onclick="goPage(${i+1})" style="width:32px;height:32px;border-radius:var(--radius-sm);border:1px solid ${i+1===currentPage?'var(--accent)':'var(--border)'};background:${i+1===currentPage?'var(--accent)':'var(--bg-card)'};color:${i+1===currentPage?'var(--bg-primary)':'var(--text-secondary)'};cursor:pointer;font-family:var(--font-body);font-size:0.8rem;">${i+1}</button>
+    `).join('');
+
+    tbody.innerHTML = page.map(u => `
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="user-avatar" style="${u.role==='admin'?'background:var(--accent2-dim);border-color:rgba(124,58,237,0.3);color:#a78bfa;':''}">${u.name.charAt(0)}</div>
+            <div>
+              <div style="font-size:0.875rem;color:var(--text-primary);font-weight:500;">${u.name}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted);">${u.email}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span style="padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700;${u.role==='admin'?'background:rgba(124,58,237,0.1);color:#a78bfa;border:1px solid rgba(124,58,237,0.25);':'background:rgba(0,229,255,0.08);color:var(--accent);border:1px solid rgba(0,229,255,0.2);'}">
+            ${u.role === 'admin' ? '⚙ Admin' : '👤 Client'}
+          </span>
+        </td>
+        <td style="font-size:0.8rem;">${u.date}</td>
+        <td>${u.orders}</td>
+        <td style="font-weight:600;color:var(--text-primary);">${u.spent > 0 ? formatPrice(u.spent) : '—'}</td>
+        <td>
+          <span style="padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700;${u.status==='actif'?'background:rgba(0,210,106,0.1);color:var(--green);border:1px solid rgba(0,210,106,0.25);':'background:rgba(255,68,68,0.1);color:var(--red);border:1px solid rgba(255,68,68,0.25);'}">
+            ${u.status === 'actif' ? '● Actif' : '● Suspendu'}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button onclick="showUser(${u.id})" class="btn-tbl-edit">Voir</button>
+            <button onclick="toggleSuspend(${u.id})" class="${u.status==='actif'?'btn-tbl-del':'btn-tbl-edit'}" style="${u.status!=='actif'?'':''}">
+              ${u.status==='actif'?'Suspendre':'Réactiver'}
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function goPage(n) { currentPage=n; renderTable(); }
+
+  function filterUsers(q) {
+    applyFilters(q, roleFilter, stateFilter);
+  }
+  function filterByRole(r) { roleFilter=r; applyFilters(document.getElementById('userSearch').value, r, stateFilter); }
+  function filterByState(s) { stateFilter=s; applyFilters(document.getElementById('userSearch').value, roleFilter, s); }
+
+  function applyFilters(q, role, state) {
+    filteredUsers = USERS.filter(u => {
+      const mq = !q || u.name.toLowerCase().includes(q.toLowerCase()) || u.email.toLowerCase().includes(q.toLowerCase());
+      const mr = !role || u.role === role;
+      const ms = !state || u.status === state;
+      return mq && mr && ms;
+    });
+    currentPage=1; renderTable();
+  }
+
+  function toggleSuspend(id) {
+    const u = USERS.find(x=>x.id===id);
+    if (!u) return;
+    u.status = u.status==='actif' ? 'suspendu' : 'actif';
+    filteredUsers = [...USERS];
+    renderTable();
+    showToast(`Compte ${u.name} : ${u.status}`, u.status==='actif'?'success':'warning');
+  }
+
+  function showUser(id) {
+    const u = USERS.find(x=>x.id===id);
+    if (!u) return;
+    document.getElementById('modalUserTitle').textContent = u.name;
+    document.getElementById('modalUserBody').innerHTML = `
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="user-avatar" style="width:64px;height:64px;font-size:1.4rem;margin:0 auto 12px;">${u.name.charAt(0)}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);">${u.email}</div>
+        <div style="margin-top:8px;">
+          <span style="padding:3px 10px;border-radius:100px;font-size:0.75rem;font-weight:700;background:${u.status==='actif'?'rgba(0,210,106,0.1)':'rgba(255,68,68,0.1)'};color:${u.status==='actif'?'var(--green)':'var(--red)'};border:1px solid ${u.status==='actif'?'rgba(0,210,106,0.25)':'rgba(255,68,68,0.25)'};">
+            ${u.status}
+          </span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;text-align:center;">
+          <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;">${u.orders}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Commandes</div>
+        </div>
+        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;text-align:center;">
+          <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:800;color:var(--accent);">${u.spent>0?formatPrice(u.spent):'—'}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;">Total dépensé</div>
+        </div>
+      </div>
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;font-size:0.875rem;color:var(--text-secondary);">
+        📍 ${u.city} &nbsp;|&nbsp; 📅 Inscrit en ${u.date} &nbsp;|&nbsp; ${u.role === 'admin' ? '⚙ Administrateur' : '👤 Client'}
+      </div>
+    `;
+    document.getElementById('userModal').classList.add('open');
+  }
+
+  document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+</body>
+</html>

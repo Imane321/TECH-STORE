@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Commandes — Aykon Tech Store</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">AYKON <span>TECH</span></a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">Accueil</a>
+        <a href="Products.html">Produits</a>
+        <a href="orders.html" class="active">Mes commandes</a>
+        <a href="profile.html">Mon profil</a>
+      </div>
+      <div class="nav-actions">
+        <button class="cart-btn" id="cartToggle">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="btn-nav-auth btn-outline" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="overlay" id="overlay" onclick="closeCart()"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header"><h3>🛒 Mon Panier</h3><button onclick="closeCart()" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.4rem;">✕</button></div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer"><div class="cart-total"><span>Total</span><span id="cartTotal">0 MAD</span></div><button class="btn-checkout" onclick="window.location.href='checkout.html'">Valider →</button></div>
+  </aside>
+
+  <div style="padding-top:calc(var(--nav-height)+40px);padding-bottom:40px;background:var(--bg-secondary);border-bottom:1px solid var(--border);">
+    <div class="container">
+      <div class="section-tag mb-8">Compte</div>
+      <h2>Mes Commandes</h2>
+      <p id="orderCount">Chargement...</p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container" style="max-width:860px;">
+
+      <!-- Filter tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;">
+        <button onclick="filterOrders('all',this)" class="filter-tab active-tab" style="padding:8px 18px;border-radius:100px;border:1px solid var(--border-accent);background:var(--accent-dim);color:var(--accent);font-family:var(--font-body);font-size:0.8rem;font-weight:600;cursor:pointer;">Toutes</button>
+        <button onclick="filterOrders('livré',this)" class="filter-tab" style="padding:8px 18px;border-radius:100px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-family:var(--font-body);font-size:0.8rem;font-weight:600;cursor:pointer;">✅ Livrées</button>
+        <button onclick="filterOrders('en cours',this)" class="filter-tab" style="padding:8px 18px;border-radius:100px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-family:var(--font-body);font-size:0.8rem;font-weight:600;cursor:pointer;">🚚 En cours</button>
+        <button onclick="filterOrders('en attente',this)" class="filter-tab" style="padding:8px 18px;border-radius:100px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-family:var(--font-body);font-size:0.8rem;font-weight:600;cursor:pointer;">⏳ En attente</button>
+        <button onclick="filterOrders('annulé',this)" class="filter-tab" style="padding:8px 18px;border-radius:100px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-family:var(--font-body);font-size:0.8rem;font-weight:600;cursor:pointer;">❌ Annulées</button>
+      </div>
+
+      <div id="ordersContainer"></div>
+
+      <!-- Order detail modal -->
+      <div class="modal-bg" id="orderModal">
+        <div class="modal" style="max-width:600px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h3 id="modalOrderId">Commande #—</h3>
+            <button onclick="document.getElementById('orderModal').classList.remove('open')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.4rem;">✕</button>
+          </div>
+          <div id="modalContent"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="js/main.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+  const MOCK_ORDERS = [
+    {
+      id:'#1042', date:'24 mai 2025', status:'livré',
+      items:[{name:'MacBook Pro 14" M3',emoji:'💻',qty:1,price:18900},{name:'Apple AirPods Pro 2',emoji:'🎵',qty:1,price:2400}],
+      total:21300, shipping:'Gratuite', address:'123 Bd Mohammed V, Casablanca'
+    },
+    {
+      id:'#1038', date:'18 mai 2025', status:'en cours',
+      items:[{name:'iPhone 15 Pro Max',emoji:'📱',qty:1,price:14500}],
+      total:14500, shipping:'Gratuite', address:'45 Rue Allal Ben Abdellah, Rabat'
+    },
+    {
+      id:'#1031', date:'10 mai 2025', status:'livré',
+      items:[{name:'Sony WH-1000XM5',emoji:'🎧',qty:1,price:2800},{name:'Logitech MX Master 3',emoji:'🖱️',qty:2,price:1780}],
+      total:4580, shipping:'Gratuite', address:'67 Avenue Hassan II, Marrakech'
+    },
+    {
+      id:'#1025', date:'2 mai 2025', status:'annulé',
+      items:[{name:'Dell Alienware m18 R2',emoji:'💻',qty:1,price:24500}],
+      total:24500, shipping:'Gratuite', address:'12 Rue Ibn Battouta, Fès'
+    },
+    {
+      id:'#1018', date:'20 avril 2025', status:'en attente',
+      items:[{name:'Xiaomi Redmi Note 13 Pro',emoji:'📱',qty:2,price:6400}],
+      total:6400, shipping:'Gratuite', address:'89 Boulevard Zerktouni, Casablanca'
+    },
+  ];
+
+  const statusConfig = {
+    'livré':     { color:'var(--green)',  bg:'rgba(0,210,106,0.1)',  border:'rgba(0,210,106,0.25)',  label:'Livré ✅' },
+    'en cours':  { color:'var(--amber)',  bg:'rgba(255,179,0,0.1)',  border:'rgba(255,179,0,0.25)',  label:'En cours 🚚' },
+    'en attente':{ color:'var(--text-muted)', bg:'rgba(138,143,158,0.1)', border:'rgba(138,143,158,0.2)', label:'En attente ⏳' },
+    'annulé':    { color:'var(--red)',    bg:'rgba(255,68,68,0.1)',  border:'rgba(255,68,68,0.25)',  label:'Annulé ❌' },
+  };
+
+  const trackingSteps = {
+    'en attente': [1,0,0,0],
+    'en cours':   [1,1,1,0],
+    'livré':      [1,1,1,1],
+    'annulé':     [0,0,0,0],
+  };
+  const stepLabels = ['Reçue','Préparée','En livraison','Livrée'];
+  const stepIcons  = ['📋','📦','🚚','✅'];
+
+  let currentFilter = 'all';
+
+  function renderOrders(orders) {
+    const container = document.getElementById('ordersContainer');
+    document.getElementById('orderCount').textContent = `${orders.length} commande${orders.length>1?'s':''}`;
+
+    if (orders.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><h3>Aucune commande</h3><p>Vous n\'avez pas encore de commandes dans cette catégorie.</p></div>';
+      return;
+    }
+
+    container.innerHTML = orders.map(order => {
+      const st = statusConfig[order.status] || statusConfig['en attente'];
+      return `
+        <div class="order-card">
+          <div class="order-card-header">
+            <div>
+              <div class="order-id">${order.id}</div>
+              <div class="order-date">${order.date}</div>
+            </div>
+            <span style="padding:5px 14px;border-radius:100px;font-size:0.75rem;font-weight:700;background:${st.bg};color:${st.color};border:1px solid ${st.border};">${st.label}</span>
+          </div>
+
+          <div class="order-items-list">
+            ${order.items.map(it => `
+              <div class="order-item-chip">
+                <span>${it.emoji}</span>
+                <span>${it.name}${it.qty > 1 ? ` × ${it.qty}` : ''}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          ${order.status !== 'annulé' ? `
+          <div class="order-timeline" style="margin:16px 0 8px;">
+            ${trackingSteps[order.status].map((active, i) => {
+              const prev = i > 0 && trackingSteps[order.status][i-1];
+              const cls = active ? (i === trackingSteps[order.status].lastIndexOf(1) ? 'active' : 'done') : '';
+              return `
+                <div class="timeline-step ${cls}">
+                  <div class="timeline-dot">${active ? stepIcons[i] : ''}</div>
+                  <div class="timeline-label">${stepLabels[i]}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>` : ''}
+
+          <div class="order-card-footer">
+            <div>
+              <span style="font-size:0.8rem;color:var(--text-muted);">Total : </span>
+              <span style="font-family:var(--font-display);font-weight:700;font-size:1rem;">${formatPrice(order.total)}</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="showOrderDetail('${order.id}')" style="padding:8px 16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-secondary);cursor:pointer;font-family:var(--font-body);font-size:0.8rem;transition:var(--transition);" onmouseover="this.style.borderColor='var(--border-accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">
+                Voir les détails
+              </button>
+              ${order.status === 'livré' ? `<button onclick="showToast('Avis envoyé !','success')" style="padding:8px 16px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:var(--radius-sm);color:var(--accent);cursor:pointer;font-family:var(--font-body);font-size:0.8rem;">⭐ Laisser un avis</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function filterOrders(status, btn) {
+    currentFilter = status;
+    document.querySelectorAll('.filter-tab').forEach(t => {
+      t.style.background = 'var(--bg-card)'; t.style.color = 'var(--text-secondary)'; t.style.borderColor = 'var(--border)';
+    });
+    btn.style.background = 'var(--accent-dim)'; btn.style.color = 'var(--accent)'; btn.style.borderColor = 'var(--border-accent)';
+    const filtered = status === 'all' ? MOCK_ORDERS : MOCK_ORDERS.filter(o => o.status === status);
+    renderOrders(filtered);
+  }
+
+  function showOrderDetail(id) {
+    const order = MOCK_ORDERS.find(o => o.id === id);
+    if (!order) return;
+    document.getElementById('modalOrderId').textContent = `Commande ${order.id}`;
+    const st = statusConfig[order.status];
+    document.getElementById('modalContent').innerHTML = `
+      <div style="margin-bottom:16px;">
+        <span style="padding:5px 14px;border-radius:100px;font-size:0.75rem;font-weight:700;background:${st.bg};color:${st.color};border:1px solid ${st.border};">${st.label}</span>
+        <span style="font-size:0.8rem;color:var(--text-muted);margin-left:12px;">Passée le ${order.date}</span>
+      </div>
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;font-weight:600;">Articles commandés</div>
+        ${order.items.map(it => `
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+            <span style="font-size:1.4rem;">${it.emoji}</span>
+            <div style="flex:1;font-size:0.875rem;">${it.name}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">× ${it.qty}</div>
+            <div style="font-weight:600;font-size:0.875rem;">${formatPrice(it.price)}</div>
+          </div>
+        `).join('')}
+        <div style="display:flex;justify-content:space-between;padding-top:12px;font-weight:700;">
+          <span>Total</span>
+          <span style="color:var(--accent);">${formatPrice(order.total)}</span>
+        </div>
+      </div>
+      <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-weight:600;">Livraison</div>
+        <div style="font-size:0.875rem;">${order.address}</div>
+        <div style="font-size:0.8rem;color:var(--green);margin-top:4px;">Livraison ${order.shipping}</div>
+      </div>
+    `;
+    document.getElementById('orderModal').classList.add('open');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => renderOrders(MOCK_ORDERS));
+  </script>
+</body>
+</html>
+

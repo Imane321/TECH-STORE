@@ -1,0 +1,13 @@
+# ============================================================
+#  .htaccess — Redirige toutes les requêtes vers index.php
+#  Router PHP (style Laravel/Slim)
+# ============================================================
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [QSA,L]
+
+# Headers CORS (optionnel si déjà dans PHP)
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type"

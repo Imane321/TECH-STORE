@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commande — Aykon Tech Store</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-logo">AYKON <span>TECH</span></a>
+      <div style="font-size:0.875rem;color:var(--text-muted);">🔒 Commande sécurisée</div>
+    </div>
+  </nav>
+
+  <div style="padding-top:calc(var(--nav-height)+32px);" id="checkoutPage">
+    <div class="container">
+
+      <!-- Steps -->
+      <div class="checkout-steps" style="margin-top:32px;">
+        <div class="ck-step active" id="step1">
+          <div class="ck-num">1</div>
+          <div class="ck-lbl">Livraison</div>
+        </div>
+        <div class="ck-step" id="step2">
+          <div class="ck-num">2</div>
+          <div class="ck-lbl">Paiement</div>
+        </div>
+        <div class="ck-step" id="step3">
+          <div class="ck-num">3</div>
+          <div class="ck-lbl">Confirmation</div>
+        </div>
+      </div>
+
+      <div class="checkout-layout" style="margin-bottom:60px;" id="checkoutLayout">
+        <!-- LEFT: Form -->
+        <div id="formSection">
+          <!-- Step 1: Livraison -->
+          <div id="formStep1">
+            <div class="checkout-form-card">
+              <h3>📦 Adresse de livraison</h3>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Prénom</label>
+                  <input type="text" class="form-input" id="firstName" placeholder="Youssef" value="Youssef">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nom</label>
+                  <input type="text" class="form-input" id="lastName" placeholder="El Amrani" value="El Amrani">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Adresse</label>
+                <input type="text" class="form-input" id="address" placeholder="123 Boulevard Mohammed V">
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Ville</label>
+                  <input type="text" class="form-input" id="city" placeholder="Casablanca">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Code postal</label>
+                  <input type="text" class="form-input" id="zip" placeholder="20000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Téléphone</label>
+                <input type="tel" class="form-input" id="phone" placeholder="06 12 34 56 78">
+              </div>
+            </div>
+
+            <div class="checkout-form-card">
+              <h3>🚚 Mode de livraison</h3>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <label style="display:flex;align-items:center;gap:16px;background:var(--bg-secondary);border:2px solid var(--accent);border-radius:var(--radius-md);padding:16px;cursor:pointer;">
+                  <input type="radio" name="delivery" value="standard" checked style="accent-color:var(--accent);">
+                  <div style="flex:1;">
+                    <div style="font-weight:600;color:var(--text-primary);">Livraison Standard</div>
+                    <div style="font-size:0.8rem;color:var(--text-muted);">3-5 jours ouvrables</div>
+                  </div>
+                  <span style="color:var(--green);font-weight:700;">Gratuite</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:16px;background:var(--bg-secondary);border:2px solid var(--border);border-radius:var(--radius-md);padding:16px;cursor:pointer;">
+                  <input type="radio" name="delivery" value="express" style="accent-color:var(--accent);">
+                  <div style="flex:1;">
+                    <div style="font-weight:600;color:var(--text-primary);">Livraison Express ⚡</div>
+                    <div style="font-size:0.8rem;color:var(--text-muted);">24h ouvrables</div>
+                  </div>
+                  <span style="font-weight:700;color:var(--text-primary);">+50 MAD</span>
+                </label>
+              </div>
+            </div>
+            <button onclick="goToStep(2)" style="width:100%;padding:14px;background:var(--accent);border:none;border-radius:var(--radius-md);color:var(--bg-primary);font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#00c9e6'" onmouseout="this.style.background='var(--accent)'">
+              Continuer vers le paiement →
+            </button>
+          </div>
+
+          <!-- Step 2: Paiement -->
+          <div id="formStep2" style="display:none;">
+            <div class="checkout-form-card">
+              <h3>💳 Mode de paiement</h3>
+              <div class="payment-methods">
+                <div class="pay-method selected" onclick="selectPay(this,'card')">
+                  <div class="pay-icon">💳</div>
+                  Carte bancaire
+                </div>
+                <div class="pay-method" onclick="selectPay(this,'cash')">
+                  <div class="pay-icon">💵</div>
+                  Paiement à la livraison
+                </div>
+                <div class="pay-method" onclick="selectPay(this,'virement')">
+                  <div class="pay-icon">🏦</div>
+                  Virement bancaire
+                </div>
+              </div>
+              <div id="cardFields">
+                <div class="form-group">
+                  <label class="form-label">Numéro de carte</label>
+                  <input type="text" class="form-input" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCard(this)">
+                </div>
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Expiration</label>
+                    <input type="text" class="form-input" placeholder="MM/AA" maxlength="5">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CVV</label>
+                    <input type="text" class="form-input" placeholder="123" maxlength="3">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Nom sur la carte</label>
+                  <input type="text" class="form-input" placeholder="YOUSSEF EL AMRANI">
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <button onclick="goToStep(1)" style="padding:14px 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-secondary);font-family:var(--font-body);font-size:0.95rem;cursor:pointer;">← Retour</button>
+              <button onclick="placeOrder()" style="flex:1;padding:14px;background:var(--accent);border:none;border-radius:var(--radius-md);color:var(--bg-primary);font-family:var(--font-body);font-size:1rem;font-weight:700;cursor:pointer;" onmouseover="this.style.background='#00c9e6'" onmouseout="this.style.background='var(--accent)'">
+                ✅ Confirmer et payer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Summary -->
+        <div class="checkout-summary" id="orderSummary">
+          <h3>Votre commande</h3>
+          <div id="summaryItems"></div>
+          <div class="summary-totals">
+            <div class="summary-row"><span>Sous-total</span><span id="ckSubtotal">—</span></div>
+            <div class="summary-row"><span>Livraison</span><span style="color:var(--green);" id="ckShipping">Gratuite</span></div>
+            <div class="summary-row"><span>TVA (20%)</span><span id="ckTva">—</span></div>
+            <div class="summary-row total"><span>Total TTC</span><span id="ckTotal">—</span></div>
+          </div>
+          <div style="margin-top:16px;text-align:center;font-size:0.78rem;color:var(--text-muted);">
+            🔒 Paiement 100% sécurisé<br>🚚 Livraison dans tout le Maroc
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Screen -->
+  <div id="successScreen" style="display:none;min-height:100vh;display:none;align-items:center;padding-top:var(--nav-height);">
+    <div class="container">
+      <div class="success-screen">
+        <div class="success-icon">✅</div>
+        <h2 style="margin-bottom:12px;">Commande confirmée !</h2>
+        <p style="font-size:1rem;margin-bottom:8px;">Merci pour votre achat.</p>
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:32px;">Numéro de commande : <strong style="color:var(--accent);" id="orderNumber">#1043</strong></p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <a href="orders.html" class="btn-hero secondary">Voir mes commandes</a>
+          <a href="index.html" class="btn-hero primary">Continuer mes achats →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="js/main.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+  let currentStep = 1;
+  let selectedPay = 'card';
+
+  document.addEventListener('DOMContentLoaded', renderSummary);
+
+  function renderSummary() {
+    const cart = getCart();
+    const subtotal = cart.reduce((s,i) => s+i.price*i.qty, 0);
+    const tva = Math.round(subtotal * 0.2);
+    const total = subtotal + tva;
+
+    document.getElementById('summaryItems').innerHTML = cart.map(item => `
+      <div class="summary-item">
+        <div class="summary-item-emoji">${item.emoji || '📦'}</div>
+        <div style="flex:1;">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text-primary);">${item.name}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Qté: ${item.qty}</div>
+        </div>
+        <div style="font-size:0.875rem;font-weight:700;">${formatPrice(item.price * item.qty)}</div>
+      </div>
+    `).join('') || '<p style="color:var(--text-muted);font-size:0.85rem;">Panier vide</p>';
+
+    document.getElementById('ckSubtotal').textContent = formatPrice(subtotal);
+    document.getElementById('ckTva').textContent = formatPrice(tva);
+    document.getElementById('ckTotal').textContent = formatPrice(total);
+  }
+
+  function goToStep(n) {
+    currentStep = n;
+    document.getElementById('formStep1').style.display = n === 1 ? 'block' : 'none';
+    document.getElementById('formStep2').style.display = n === 2 ? 'block' : 'none';
+    ['step1','step2','step3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.classList.remove('active','done');
+      if (i + 1 < n) el.classList.add('done');
+      if (i + 1 === n) el.classList.add('active');
+    });
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function selectPay(el, type) {
+    selectedPay = type;
+    document.querySelectorAll('.pay-method').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('cardFields').style.display = type === 'card' ? 'block' : 'none';
+  }
+
+  function formatCard(input) {
+    let v = input.value.replace(/\D/g,'').substring(0,16);
+    input.value = v.replace(/(.{4})/g,'$1 ').trim();
+  }
+
+  function placeOrder() {
+    const btn = event.target;
+    btn.textContent = '⏳ Traitement...'; btn.disabled = true;
+    setTimeout(() => {
+      clearCart();
+      document.getElementById('checkoutPage').style.display = 'none';
+      const ss = document.getElementById('successScreen');
+      ss.style.display = 'flex';
+      document.getElementById('orderNumber').textContent = '#' + (1000 + Math.floor(Math.random()*999));
+      showToast('Commande passée avec succès !', 'success');
+    }, 1500);
+  }
+  </script>
+</body>
+</html>
+
+
